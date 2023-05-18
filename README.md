@@ -1,2 +1,2 @@
-# social-app
-Prosta aplikacja internetowa serwisu społecznościowego
+# social-app [work in progress]
+## Prosta aplikacja internetowa serwisu społecznościowego
