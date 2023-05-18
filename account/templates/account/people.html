@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}People{% endblock %}
+
+{% block content %}
+<div style="height: 50px;"></div>
+    <div class='pageHolder'>
+    {% for people in peoples %}
+    <div class='page'><img style="height:200px;width:200px;" src="{{ people.photo.url }}"><p><a href="{% url 'my_profile' id=people.user.id %}"> {{ people }}</a></p></div>
+    {% endfor %}
+    </div>
+{% endblock %}

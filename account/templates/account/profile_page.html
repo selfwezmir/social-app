@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Page profile{% endblock %}
+
+{% block content %}
+    <div class='center'>
+      <div style="height: 50px;"></div>
+      {% for post in posts %}
+
+        <div class="test">
+          <div style="display: flex; justify-content: space-between;">
+          <img style="height:40px;width:40px;border-radius: 50%;margin: 5px;" src="{{ post.author.profile.photo.url }}"><p style="font-size: 20px;flex-basis: 50%;text-align: left;margin-left: 5%;"><b>{{ post.author }}</b></p>
+          <p style="flex-basis: 50%;text-align: right;margin-right: 5%;">{{ post.created }}</p>
+          <!-- 49.5% + 49.5% = 99%, remaining 1% is distributed according to justify-content -->
+          </div>
+          <p style="text-align: left; margin-left: 5%;">{{ post.body }}</p>
+        </div>
+      <div style="height: 50px;"></div>
+      {% endfor %}
+      <div class="fixed">
+        <img src="{{ user_post.profile.photo.url }}">
+        <p>
+          {% with total_followers=user.followers.count %}
+          Followers<span class="total">{{ total_followers }}</span>
+          <span style="float: right;">Following {{ following }}</span>
+          {% endwith %}
+        </p>
+          <a href="" data-id="{{ user.id }}" data-action="{% if request.user in user.followers.all %}un{% endif %}follow" class="follow button">
+
+      {% if request.user not in user.followers.all %}
+        Follow
+      {% else %}
+        Unfollow
+      {% endif %}
+      </a>
+      </div>
+    </div>
+{% endblock %}
+{% block domready %}
+  const url = '{% url "user_follow" %}';
+  var options = {
+    method: 'POST',
+    headers: {'X-CSRFToken': csrftoken},
+    mode: 'same-origin'
+  }
+
+  document.querySelector('a.follow')
+          .addEventListener('click', function(e){
+    e.preventDefault();
+    var followButton = this;
+
+    // add request body
+    var formData = new FormData();
+    formData.append('id', followButton.dataset.id);
+    formData.append('action', followButton.dataset.action);
+    options['body'] = formData;
+
+    // send HTTP request
+    fetch(url, options)
+    .then(response => response.json())
+    .then(data => {
+      if (data['status'] === 'ok')
+      {
+        var previousAction = followButton.dataset.action;
+
+        // toggle button text and data-action
+        var action = previousAction === 'follow' ? 'unfollow' : 'follow';
+        followButton.dataset.action = action;
+        followButton.innerHTML = action;
+
+        // update follower count
+        var followerCount = document.querySelector('span.total');
+        var totalFollowers = parseInt(followerCount.innerHTML);
+        followerCount.innerHTML = previousAction === 'follow' ? totalFollowers + 1 : totalFollowers - 1;
+      }
+    })
+  });
+{% endblock %}
